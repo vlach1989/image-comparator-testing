@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import './style.css';
 
+const maxWidth = 800;
+const maxHeight = 450;
+
 class Comparator extends Component {
     constructor(props) {
         super(props);
@@ -22,8 +25,8 @@ class Comparator extends Component {
             const stepp = e.movementY;
 
             this.setState({
-                width: width + step,
-                height: height + stepp
+                width: (width + step) > maxWidth ? maxWidth : (width + step),
+                height: (height + stepp) > maxHeight ? maxHeight : (height + stepp)
             });
         }
     }
@@ -40,13 +43,30 @@ class Comparator extends Component {
         })
     }
 
+    // TODO move to utils
+	isNumber(number) {
+    	return typeof(number) === "number";
+	}
+
     render() {
-        let verticalHandleStyle = this.state.width ? {left: this.state.width} : null;
-        let horizontalHandleStyle = this.state.height ? {top: this.state.height} : null;
-        let topLeftStyle = this.state.width && this.state.height ? {width: this.state.width, height: this.state.height} : null;
-        let topRightStyle = this.state.width && this.state.height  ? {width: 800 - this.state.width, height: this.state.height} : null;
-        let bottomLeftStyle = this.state.width && this.state.height ? {width: this.state.width, height: 450 - this.state.height} : null;
-        let bottomRightStyle = this.state.width && this.state.height  ? {width: 800 - this.state.width, height: 450 - this.state.height} : null;
+    	const s = this.state;
+
+        let verticalHandleStyle = this.isNumber(s.width) ? {left: s.width} : null;
+        let horizontalHandleStyle = this.isNumber(s.height) ? {top: s.height} : null;
+        let topLeftStyle = this.isNumber(s.width) && this.isNumber(s.height) ? {width: s.width, height: s.height} : null;
+        let topRightStyle = this.isNumber(s.width) && this.isNumber(s.height)  ? {width: 800 - s.width, height: s.height} : null;
+        let bottomLeftStyle = this.isNumber(s.width) && this.isNumber(s.height) ? {width: s.width, height: 450 - s.height} : null;
+        let bottomRightStyle = this.isNumber(s.width) && this.isNumber(s.height)  ? {width: 800 - s.width, height: 450 - s.height} : null;
+
+        console.log("verticalHandleStyle", verticalHandleStyle);
+        console.log("horizontalHandleStyle", horizontalHandleStyle);
+        console.log("topLeftStyle", topLeftStyle);
+        console.log("topRightStyle", topRightStyle);
+        console.log("bottomLeftStyle", bottomLeftStyle);
+        console.log("bottomRightStyle", bottomRightStyle);
+        console.log("width", s.width);
+        console.log("height", s.height);
+		console.log("-------------------");
 
         return (
             <div onMouseMove={this.onMouseMove} onMouseUp={this.onMouseUp} className="ric-container">
