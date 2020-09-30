@@ -8,40 +8,60 @@ class Comparator extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            width: null,
-            height: null,
-            enableDragging: false
+            width: 320,
+            height: 270,
+            horizontalDragging: false,
+			verticalDragging: false
         };
-        this.onMouseDown = this.onMouseDown.bind(this);
-        this.onMouseUp = this.onMouseUp.bind(this);
+        this.enableHorizontal = this.enableHorizontal.bind(this);
+        this.enableVertical = this.enableVertical.bind(this);
+        this.disableHorizontal = this.disableHorizontal.bind(this);
+        this.disableVertical = this.disableVertical.bind(this);
         this.onMouseMove = this.onMouseMove.bind(this);
     }
 
     onMouseMove(e) {
-        if (this.state.enableDragging) {
-            const width = e.clientX;
-            const height = e.clientY;
-            const step = e.movementX;
-            const stepp = e.movementY;
+    	let change = {};
+    	if (this.state.horizontalDragging) {
+			const height = e.clientY;
+			const stepp = e.movementY;
+			change.height = (height + stepp) > maxHeight ? maxHeight : (height + stepp);
+		}
 
-            this.setState({
-                width: (width + step) > maxWidth ? maxWidth : (width + step),
-                height: (height + stepp) > maxHeight ? maxHeight : (height + stepp)
-            });
-        }
+    	if (this.state.verticalDragging) {
+			const width = e.clientX;
+			const step = e.movementX;
+			change.width = (width + step) > maxWidth ? maxWidth : (width + step);
+		}
+
+        if (!(Object.keys(change).length === 0 && change.constructor === Object)) {
+        	this.setState(change);
+		}
     }
 
-    onMouseDown(e) {
+    enableHorizontal(e) {
         this.setState({
-            enableDragging: true
+            horizontalDragging: true
         })
     }
 
-    onMouseUp(e) {
+    disableHorizontal(e) {
         this.setState({
-            enableDragging: false
+			horizontalDragging: false
         })
     }
+
+	enableVertical(e) {
+		this.setState({
+			verticalDragging: true
+		})
+	}
+
+	disableVertical(e) {
+		this.setState({
+			verticalDragging: false
+		})
+	}
 
     // TODO move to utils
 	isNumber(number) {
@@ -69,7 +89,7 @@ class Comparator extends Component {
 		console.log("-------------------");
 
         return (
-            <div onMouseMove={this.onMouseMove} onMouseUp={this.onMouseUp} className="ric-container">
+            <div onMouseMove={this.onMouseMove} className="ric-container">
                 <div className="ric-image-wrapper top-left" style={topLeftStyle}></div>
                 <div className="ric-image-wrapper top-right" style={topRightStyle}></div>
                 <div className="ric-image-wrapper bottom-right" style={bottomRightStyle}></div>
@@ -77,14 +97,16 @@ class Comparator extends Component {
                 <div
                     className="ric-handle ric-vertical-handle"
                     draggable={true}
-                    onMouseDown={this.onMouseDown}
+					onMouseUp={this.disableVertical}
+                    onMouseDown={this.enableVertical}
                     style={verticalHandleStyle}
                 >
                 </div>
                 <div
                     className="ric-handle ric-horizontal-handle"
                     draggable={true}
-                    onMouseDown={this.onMouseDown}
+					onMouseUp={this.disableHorizontal}
+                    onMouseDown={this.enableHorizontal}
                     style={horizontalHandleStyle}
                 >
                 </div>
