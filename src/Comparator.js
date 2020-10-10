@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
 import './style.css';
 
+import machu from "./img/machu.jpg";
+
+// TODO limits in %
+// TODO position (something around from all sides) + check of position of cursor and remove rests of pictures
+// TODO dragend
+
 const maxWidth = 800;
 const maxHeight = 450;
 
@@ -15,23 +21,23 @@ class Comparator extends Component {
         };
         this.enableHorizontal = this.enableHorizontal.bind(this);
         this.enableVertical = this.enableVertical.bind(this);
+        this.enableBoth = this.enableBoth.bind(this);
         this.disableHorizontal = this.disableHorizontal.bind(this);
         this.disableVertical = this.disableVertical.bind(this);
+        this.disableBoth = this.disableBoth.bind(this);
         this.onMouseMove = this.onMouseMove.bind(this);
     }
 
     onMouseMove(e) {
     	let change = {};
     	if (this.state.horizontalDragging) {
-			const height = e.clientY;
-			const stepp = e.movementY;
-			change.height = (height + stepp) > maxHeight ? maxHeight : (height + stepp);
+			const height = e.pageY;
+			change.height = height > maxHeight ? maxHeight : height;
 		}
 
     	if (this.state.verticalDragging) {
-			const width = e.clientX;
-			const step = e.movementX;
-			change.width = (width + step) > maxWidth ? maxWidth : (width + step);
+			const width = e.pageX;
+			change.width = width > maxWidth ? maxWidth : width;
 		}
 
         if (!(Object.keys(change).length === 0 && change.constructor === Object)) {
@@ -52,14 +58,30 @@ class Comparator extends Component {
     }
 
 	enableVertical(e) {
+		console.log("Enable")
 		this.setState({
 			verticalDragging: true
 		})
 	}
 
 	disableVertical(e) {
+    	console.log("Disable")
 		this.setState({
 			verticalDragging: false
+		})
+	}
+
+	enableBoth(e) {
+    	this.setState({
+			verticalDragging: true,
+			horizontalDragging:  true
+		})
+	}
+
+	disableBoth(e) {
+		this.setState({
+			verticalDragging: false,
+			horizontalDragging:  false
 		})
 	}
 
@@ -73,25 +95,27 @@ class Comparator extends Component {
 
         let verticalHandleStyle = this.isNumber(s.width) ? {left: s.width} : null;
         let horizontalHandleStyle = this.isNumber(s.height) ? {top: s.height} : null;
+
+
+		let middleHandleStyle = {};
+		if (this.isNumber(s.height)) {
+			middleHandleStyle.top = s.height - 7;
+		}
+		if (this.isNumber(s.width)) {
+			middleHandleStyle.left = s.width - 7;
+		}
+
         let topLeftStyle = this.isNumber(s.width) && this.isNumber(s.height) ? {width: s.width, height: s.height} : null;
         let topRightStyle = this.isNumber(s.width) && this.isNumber(s.height)  ? {width: 800 - s.width, height: s.height} : null;
         let bottomLeftStyle = this.isNumber(s.width) && this.isNumber(s.height) ? {width: s.width, height: 450 - s.height} : null;
         let bottomRightStyle = this.isNumber(s.width) && this.isNumber(s.height)  ? {width: 800 - s.width, height: 450 - s.height} : null;
 
-        console.log("verticalHandleStyle", verticalHandleStyle);
-        console.log("horizontalHandleStyle", horizontalHandleStyle);
-        console.log("topLeftStyle", topLeftStyle);
-        console.log("topRightStyle", topRightStyle);
-        console.log("bottomLeftStyle", bottomLeftStyle);
-        console.log("bottomRightStyle", bottomRightStyle);
-        console.log("width", s.width);
-        console.log("height", s.height);
-		console.log("-------------------");
-
         return (
             <div onMouseMove={this.onMouseMove} className="ric-container">
-                <div className="ric-image-wrapper top-left" style={topLeftStyle}></div>
-                <div className="ric-image-wrapper top-right" style={topRightStyle}></div>
+                <div className="ric-image-wrapper top-left" style={topLeftStyle}>
+				</div>
+                <div className="ric-image-wrapper top-right" style={topRightStyle}>
+				</div>
                 <div className="ric-image-wrapper bottom-right" style={bottomRightStyle}></div>
                 <div className="ric-image-wrapper bottom-left" style={bottomLeftStyle}></div>
                 <div
@@ -99,17 +123,25 @@ class Comparator extends Component {
                     draggable={true}
 					onMouseUp={this.disableVertical}
                     onMouseDown={this.enableVertical}
+					onDragStart={(e) => e.preventDefault()}
                     style={verticalHandleStyle}
-                >
-                </div>
+                />
                 <div
                     className="ric-handle ric-horizontal-handle"
                     draggable={true}
 					onMouseUp={this.disableHorizontal}
                     onMouseDown={this.enableHorizontal}
+					onDragStart={(e) => e.preventDefault()}
                     style={horizontalHandleStyle}
-                >
-                </div>
+                />
+                <div
+					className="ric-handle ric-middle-handle"
+					draggable={true}
+					onMouseUp={this.disableBoth}
+					onMouseDown={this.enableBoth}
+					onDragStart={(e) => e.preventDefault()}
+					style={middleHandleStyle}
+				/>
             </div>
         );
     }
