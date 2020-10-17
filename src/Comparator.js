@@ -4,7 +4,7 @@ import './style.css';
 import machu from "./img/machu.jpg";
 
 // TODO limits in %
-// TODO position (something around from all sides) + check of position of cursor and remove rests of pictures
+// TODO position (something around from all sides) + check of position of cursor and remove rests of pictures - onMouseLeave od container - and check what direction?
 // TODO dragend
 
 const maxWidth = 800;
@@ -13,12 +13,16 @@ const maxHeight = 450;
 class Comparator extends Component {
     constructor(props) {
         super(props);
+
+        this.ref = React.createRef();
+
         this.state = {
             width: 320,
             height: 270,
             horizontalDragging: false,
 			verticalDragging: false
         };
+
         this.enableHorizontal = this.enableHorizontal.bind(this);
         this.enableVertical = this.enableVertical.bind(this);
         this.enableBoth = this.enableBoth.bind(this);
@@ -28,16 +32,20 @@ class Comparator extends Component {
         this.onMouseMove = this.onMouseMove.bind(this);
     }
 
-    onMouseMove(e) {
+	onMouseMove(e) {
+		const componentX = this.ref.current.offsetLeft;
+		const componentY = this.ref.current.offsetTop;
+
+		const x = e.pageX - componentX;
+		const y = e.pageY - componentY;
+
     	let change = {};
     	if (this.state.horizontalDragging) {
-			const height = e.pageY;
-			change.height = height > maxHeight ? maxHeight : height;
+			change.height = y > maxHeight ? maxHeight : (y < 0 ? 0 : y);
 		}
 
     	if (this.state.verticalDragging) {
-			const width = e.pageX;
-			change.width = width > maxWidth ? maxWidth : width;
+			change.width = x > maxWidth ? maxWidth : (x < 0 ? 0 : x);
 		}
 
         if (!(Object.keys(change).length === 0 && change.constructor === Object)) {
@@ -58,14 +66,12 @@ class Comparator extends Component {
     }
 
 	enableVertical(e) {
-		console.log("Enable")
 		this.setState({
 			verticalDragging: true
 		})
 	}
 
 	disableVertical(e) {
-    	console.log("Disable")
 		this.setState({
 			verticalDragging: false
 		})
@@ -99,10 +105,10 @@ class Comparator extends Component {
 
 		let middleHandleStyle = {};
 		if (this.isNumber(s.height)) {
-			middleHandleStyle.top = s.height - 7;
+			middleHandleStyle.top = s.height - 6;
 		}
 		if (this.isNumber(s.width)) {
-			middleHandleStyle.left = s.width - 7;
+			middleHandleStyle.left = s.width - 6;
 		}
 
         let topLeftStyle = this.isNumber(s.width) && this.isNumber(s.height) ? {width: s.width, height: s.height} : null;
@@ -111,7 +117,7 @@ class Comparator extends Component {
         let bottomRightStyle = this.isNumber(s.width) && this.isNumber(s.height)  ? {width: 800 - s.width, height: 450 - s.height} : null;
 
         return (
-            <div onMouseMove={this.onMouseMove} className="ric-container">
+            <div onMouseMove={this.onMouseMove} onMouseLeave={this.onMouseMove} className="ric-container" ref={this.ref}>
                 <div className="ric-image-wrapper top-left" style={topLeftStyle}>
 				</div>
                 <div className="ric-image-wrapper top-right" style={topRightStyle}>
@@ -123,6 +129,7 @@ class Comparator extends Component {
                     draggable={true}
 					onMouseUp={this.disableVertical}
                     onMouseDown={this.enableVertical}
+					onMouseOut={(e) => console.log("onMouseOut", e.pageX)}
 					onDragStart={(e) => e.preventDefault()}
                     style={verticalHandleStyle}
                 />
